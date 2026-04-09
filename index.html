@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Year in Pixels</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --text-muted: #7d8590;
+      --filled: #39d353;
+      --filled-q1: #39d353;
+      --filled-q2: #2ea043;
+      --filled-q3: #26a641;
+      --filled-q4: #006d32;
+      --today: #f0883e;
+      --empty: #21262d;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    header h1 {
+      font-size: 1.8rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.02em;
+    }
+
+    header .subtitle {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    .stats {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 2.5rem;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem 1.5rem;
+      text-align: center;
+      min-width: 130px;
+    }
+
+    .stat-card .value {
+      font-size: 1.6rem;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .stat-card .label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-top: 0.25rem;
+    }
+
+    .quarter-section {
+      margin-bottom: 2rem;
+    }
+
+    .quarter-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    .quarter-badge {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.3rem 0.75rem;
+      font-weight: 600;
+      font-size: 0.85rem;
+      letter-spacing: 0.03em;
+      white-space: nowrap;
+    }
+
+    .quarter-badge.active {
+      border-color: var(--today);
+      color: var(--today);
+    }
+
+    .quarter-progress {
+      flex: 1;
+      height: 4px;
+      background: var(--empty);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .quarter-progress-fill {
+      height: 100%;
+      border-radius: 2px;
+      transition: width 0.3s ease;
+    }
+
+    .quarter-pct {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    .months-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+    }
+
+    .month {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.75rem;
+    }
+
+    .month-name {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .month-count {
+      font-size: 0.7rem;
+      font-weight: 400;
+      color: var(--text-muted);
+      opacity: 0.7;
+    }
+
+    .days-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 3px;
+    }
+
+    .day {
+      aspect-ratio: 1;
+      border-radius: 2px;
+      background: var(--empty);
+      position: relative;
+      min-width: 0;
+    }
+
+    .day.filled {
+      background: var(--filled);
+      opacity: 0.85;
+    }
+
+    .day.today {
+      background: var(--today);
+      opacity: 1;
+      box-shadow: 0 0 6px rgba(240, 136, 62, 0.5);
+    }
+
+    .day.birthday {
+      background: #f778ba;
+      opacity: 1;
+      box-shadow: 0 0 6px rgba(247, 120, 186, 0.5);
+    }
+
+    .day.empty-slot {
+      background: transparent;
+    }
+
+    .tooltip {
+      display: none;
+      position: fixed;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.4rem 0.6rem;
+      font-size: 0.75rem;
+      color: var(--text);
+      pointer-events: none;
+      z-index: 100;
+      white-space: nowrap;
+    }
+
+    .legend {
+      display: flex;
+      justify-content: center;
+      gap: 1.5rem;
+      margin-top: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .legend-swatch {
+      width: 12px;
+      height: 12px;
+      border-radius: 2px;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 2.5rem;
+      color: var(--text-muted);
+      font-size: 0.75rem;
+    }
+
+    @media (max-width: 700px) {
+      .months-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .stats {
+        gap: 0.5rem;
+      }
+      .stat-card {
+        min-width: 100px;
+        padding: 0.75rem 1rem;
+      }
+    }
+
+    @media (max-width: 440px) {
+      .months-grid {
+        grid-template-columns: 1fr;
+      }
+      body {
+        padding: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Year in Pixels</h1>
+      <p class="subtitle" id="subtitle"></p>
+    </header>
+
+    <div class="stats" id="stats"></div>
+    <div id="quarters"></div>
+
+    <div class="legend">
+      <div class="legend-item">
+        <div class="legend-swatch" style="background: var(--empty)"></div>
+        <span>Remaining</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-swatch" style="background: var(--filled)"></div>
+        <span>Passed</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-swatch" style="background: var(--today)"></div>
+        <span>Today</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-swatch" style="background: #f778ba"></div>
+        <span>Birthday</span>
+      </div>
+    </div>
+
+    <footer>
+      <p>Time doesn't wait. Make it count.</p>
+    </footer>
+  </div>
+
+  <div class="tooltip" id="tooltip"></div>
+
+  <script>
+    const BIRTHDAY_MONTH = 5;
+    const BIRTHDAY_DAY = 11;
+
+    const MONTH_NAMES = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+
+    const QUARTER_MONTHS = [
+      [0, 1, 2],
+      [3, 4, 5],
+      [6, 7, 8],
+      [9, 10, 11]
+    ];
+
+    const QUARTER_COLORS = ['#39d353', '#2ea043', '#1a7f37', '#006d32'];
+
+    function getDaysInMonth(year, month) {
+      return new Date(year, month + 1, 0).getDate();
+    }
+
+    function getDayOfYear(date) {
+      const start = new Date(date.getFullYear(), 0, 0);
+      const diff = date - start;
+      return Math.floor(diff / (1000 * 60 * 60 * 24));
+    }
+
+    function getDaysInYear(year) {
+      return (year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0)) ? 366 : 365;
+    }
+
+    function getStartDayOfWeek(year, month) {
+      return new Date(year, month, 1).getDay();
+    }
+
+    function render() {
+      const now = new Date();
+      const year = now.getFullYear();
+      const today = now.getDate();
+      const currentMonth = now.getMonth();
+      const totalDays = getDaysInYear(year);
+      const dayOfYear = getDayOfYear(now);
+      const daysLeft = totalDays - dayOfYear;
+      const pct = ((dayOfYear / totalDays) * 100).toFixed(1);
+
+      // Subtitle
+      document.getElementById('subtitle').textContent =
+        `${year} — Day ${dayOfYear} of ${totalDays}`;
+
+      // Current quarter info
+      const currentQuarter = Math.floor(currentMonth / 3);
+      const qMonths = QUARTER_MONTHS[currentQuarter];
+      const qStart = new Date(year, qMonths[0], 1);
+      const qEnd = new Date(year, qMonths[2] + 1, 0);
+      const qTotal = Math.round((qEnd - qStart) / (1000 * 60 * 60 * 24)) + 1;
+      const qPassed = Math.min(qTotal, Math.round((now - qStart) / (1000 * 60 * 60 * 24)) + 1);
+      const qLeft = qTotal - qPassed;
+
+      // Weeks left in year
+      const weeksLeft = Math.floor(daysLeft / 7);
+
+      // Stats
+      const statsEl = document.getElementById('stats');
+      const statsData = [
+        { value: dayOfYear, label: 'Days passed' },
+        { value: daysLeft, label: 'Days left' },
+        { value: `${pct}%`, label: 'Year complete' },
+        { value: `Q${currentQuarter + 1}: ${qLeft}d`, label: 'Left in quarter' },
+        { value: weeksLeft, label: 'Weeks left' },
+      ];
+      statsEl.innerHTML = statsData.map(s => `
+        <div class="stat-card">
+          <div class="value">${s.value}</div>
+          <div class="label">${s.label}</div>
+        </div>
+      `).join('');
+
+      // Quarters
+      const quartersEl = document.getElementById('quarters');
+      quartersEl.innerHTML = '';
+
+      QUARTER_MONTHS.forEach((months, qi) => {
+        const section = document.createElement('div');
+        section.className = 'quarter-section';
+
+        // Quarter progress
+        const qS = new Date(year, months[0], 1);
+        const qE = new Date(year, months[2] + 1, 0);
+        const qTot = Math.round((qE - qS) / (1000 * 60 * 60 * 24)) + 1;
+        let qPass = 0;
+        if (now >= qE) {
+          qPass = qTot;
+        } else if (now >= qS) {
+          qPass = Math.round((now - qS) / (1000 * 60 * 60 * 24)) + 1;
+        }
+        const qPct = Math.min(100, ((qPass / qTot) * 100)).toFixed(0);
+        const isActive = qi === currentQuarter;
+
+        section.innerHTML = `
+          <div class="quarter-header">
+            <span class="quarter-badge ${isActive ? 'active' : ''}">Q${qi + 1}</span>
+            <div class="quarter-progress">
+              <div class="quarter-progress-fill" style="width: ${qPct}%; background: ${QUARTER_COLORS[qi]}"></div>
+            </div>
+            <span class="quarter-pct">${qPct}%</span>
+          </div>
+          <div class="months-grid"></div>
+        `;
+
+        const grid = section.querySelector('.months-grid');
+
+        months.forEach(m => {
+          const daysInMonth = getDaysInMonth(year, m);
+          const startDay = getStartDayOfWeek(year, m);
+          let passedInMonth = 0;
+
+          if (m < currentMonth) {
+            passedInMonth = daysInMonth;
+          } else if (m === currentMonth) {
+            passedInMonth = today;
+          }
+
+          const monthEl = document.createElement('div');
+          monthEl.className = 'month';
+
+          const countText = m === currentMonth
+            ? `${daysInMonth - today}d left`
+            : m < currentMonth
+              ? 'done'
+              : `${daysInMonth}d`;
+
+          monthEl.innerHTML = `
+            <div class="month-name">
+              <span>${MONTH_NAMES[m]}</span>
+              <span class="month-count">${countText}</span>
+            </div>
+            <div class="days-grid"></div>
+          `;
+
+          const daysGrid = monthEl.querySelector('.days-grid');
+
+          // Empty slots for alignment to day of week
+          for (let i = 0; i < startDay; i++) {
+            const empty = document.createElement('div');
+            empty.className = 'day empty-slot';
+            daysGrid.appendChild(empty);
+          }
+
+          for (let d = 1; d <= daysInMonth; d++) {
+            const dayEl = document.createElement('div');
+            dayEl.className = 'day';
+
+            const isBirthday = (m + 1 === BIRTHDAY_MONTH && d === BIRTHDAY_DAY);
+            const isToday = (m === currentMonth && d === today);
+            const isPassed = (m < currentMonth) || (m === currentMonth && d < today);
+
+            if (isToday) {
+              dayEl.classList.add('today');
+            } else if (isBirthday && !isPassed) {
+              dayEl.classList.add('birthday');
+            } else if (isPassed) {
+              dayEl.classList.add('filled');
+            }
+
+            // Tooltip data
+            const dateObj = new Date(year, m, d);
+            const dayName = dateObj.toLocaleDateString('en-US', { weekday: 'short' });
+            let label = `${dayName}, ${MONTH_NAMES[m]} ${d}`;
+            if (isToday) label += ' (today)';
+            if (isBirthday) label += ' 🎂';
+            dayEl.setAttribute('data-tip', label);
+
+            dayEl.addEventListener('mouseenter', showTooltip);
+            dayEl.addEventListener('mouseleave', hideTooltip);
+
+            daysGrid.appendChild(dayEl);
+          }
+
+          grid.appendChild(monthEl);
+        });
+
+        quartersEl.appendChild(section);
+      });
+    }
+
+    const tooltipEl = document.getElementById('tooltip');
+
+    function showTooltip(e) {
+      const tip = e.target.getAttribute('data-tip');
+      if (!tip) return;
+      tooltipEl.textContent = tip;
+      tooltipEl.style.display = 'block';
+      positionTooltip(e);
+    }
+
+    function positionTooltip(e) {
+      tooltipEl.style.left = e.clientX + 10 + 'px';
+      tooltipEl.style.top = e.clientY - 30 + 'px';
+    }
+
+    function hideTooltip() {
+      tooltipEl.style.display = 'none';
+    }
+
+    document.addEventListener('mousemove', (e) => {
+      if (tooltipEl.style.display === 'block') {
+        positionTooltip(e);
+      }
+    });
+
+    render();
+
+    // Update at midnight
+    function scheduleNextDay() {
+      const now = new Date();
+      const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+      const ms = tomorrow - now;
+      setTimeout(() => {
+        render();
+        scheduleNextDay();
+      }, ms);
+    }
+    scheduleNextDay();
+  </script>
+</body>
+</html>
