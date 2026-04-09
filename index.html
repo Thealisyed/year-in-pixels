@@ -12,12 +12,9 @@
       --text: #e6edf3;
       --text-muted: #7d8590;
       --filled: #39d353;
-      --filled-q1: #39d353;
-      --filled-q2: #2ea043;
-      --filled-q3: #26a641;
-      --filled-q4: #006d32;
       --today: #f0883e;
       --empty: #21262d;
+      --birthday: #f778ba;
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -28,6 +25,7 @@
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
       min-height: 100vh;
       padding: 2rem;
+      overflow-x: hidden;
     }
 
     .container {
@@ -35,16 +33,24 @@
       margin: 0 auto;
     }
 
+    /* ── Header ── */
     header {
       text-align: center;
-      margin-bottom: 2.5rem;
+      margin-bottom: 2rem;
+      opacity: 0;
+      transform: translateY(-20px);
+      animation: fadeDown 0.8s ease forwards;
+    }
+
+    @keyframes fadeDown {
+      to { opacity: 1; transform: translateY(0); }
     }
 
     header h1 {
       font-size: 1.8rem;
       font-weight: 600;
-      margin-bottom: 0.5rem;
       letter-spacing: -0.02em;
+      margin-bottom: 0.25rem;
     }
 
     header .subtitle {
@@ -52,6 +58,86 @@
       font-size: 0.95rem;
     }
 
+    .live-clock {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 0.4rem;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 0.03em;
+    }
+
+    .clock-separator {
+      animation: blink 1s step-end infinite;
+    }
+
+    @keyframes blink {
+      50% { opacity: 0; }
+    }
+
+    /* ── Year Progress Ring ── */
+    .progress-ring-container {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 2rem;
+      opacity: 0;
+      animation: fadeIn 0.6s ease 0.3s forwards;
+    }
+
+    @keyframes fadeIn {
+      to { opacity: 1; }
+    }
+
+    .progress-ring-wrapper {
+      position: relative;
+      width: 180px;
+      height: 180px;
+    }
+
+    .progress-ring {
+      transform: rotate(-90deg);
+      width: 180px;
+      height: 180px;
+    }
+
+    .progress-ring-bg {
+      fill: none;
+      stroke: var(--empty);
+      stroke-width: 8;
+    }
+
+    .progress-ring-fill {
+      fill: none;
+      stroke: url(#ringGradient);
+      stroke-width: 8;
+      stroke-linecap: round;
+      stroke-dasharray: 0 502.65;
+      transition: stroke-dasharray 2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .progress-ring-center {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+    }
+
+    .progress-ring-pct {
+      font-size: 2.2rem;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      line-height: 1;
+    }
+
+    .progress-ring-label {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-top: 0.2rem;
+    }
+
+    /* ── Stats ── */
     .stats {
       display: flex;
       gap: 1rem;
@@ -63,10 +149,19 @@
     .stat-card {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 8px;
+      border-radius: 10px;
       padding: 1rem 1.5rem;
       text-align: center;
       min-width: 130px;
+      opacity: 0;
+      transform: translateY(15px);
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-2px) !important;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      border-color: #484f58;
     }
 
     .stat-card .value {
@@ -76,15 +171,26 @@
     }
 
     .stat-card .label {
-      font-size: 0.75rem;
+      font-size: 0.7rem;
       color: var(--text-muted);
       text-transform: uppercase;
       letter-spacing: 0.05em;
       margin-top: 0.25rem;
     }
 
+    /* ── Quarters ── */
     .quarter-section {
       margin-bottom: 2rem;
+      opacity: 0;
+      transform: translateY(20px);
+    }
+
+    .quarter-section.visible {
+      animation: slideUp 0.5s ease forwards;
+    }
+
+    @keyframes slideUp {
+      to { opacity: 1; transform: translateY(0); }
     }
 
     .quarter-header {
@@ -103,25 +209,37 @@
       font-size: 0.85rem;
       letter-spacing: 0.03em;
       white-space: nowrap;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .quarter-badge:hover {
+      transform: scale(1.05);
     }
 
     .quarter-badge.active {
       border-color: var(--today);
       color: var(--today);
+      box-shadow: 0 0 12px rgba(240, 136, 62, 0.15);
+    }
+
+    .quarter-badge.completed {
+      border-color: var(--filled);
+      color: var(--filled);
     }
 
     .quarter-progress {
       flex: 1;
-      height: 4px;
+      height: 6px;
       background: var(--empty);
-      border-radius: 2px;
+      border-radius: 3px;
       overflow: hidden;
     }
 
     .quarter-progress-fill {
       height: 100%;
-      border-radius: 2px;
-      transition: width 0.3s ease;
+      border-radius: 3px;
+      width: 0%;
+      transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .quarter-pct {
@@ -129,8 +247,11 @@
       color: var(--text-muted);
       font-variant-numeric: tabular-nums;
       white-space: nowrap;
+      min-width: 32px;
+      text-align: right;
     }
 
+    /* ── Months ── */
     .months-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -140,8 +261,19 @@
     .month {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 8px;
+      border-radius: 10px;
       padding: 0.75rem;
+      transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+    }
+
+    .month:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.25);
+      border-color: #484f58;
+    }
+
+    .month.current-month {
+      border-color: rgba(240, 136, 62, 0.3);
     }
 
     .month-name {
@@ -154,11 +286,35 @@
       align-items: center;
     }
 
+    .month.current-month .month-name span:first-child {
+      color: var(--today);
+    }
+
     .month-count {
       font-size: 0.7rem;
       font-weight: 400;
       color: var(--text-muted);
       opacity: 0.7;
+    }
+
+    .month-progress-bar {
+      height: 2px;
+      background: var(--empty);
+      border-radius: 1px;
+      margin-bottom: 0.5rem;
+      overflow: hidden;
+    }
+
+    .month-progress-fill {
+      height: 100%;
+      border-radius: 1px;
+      background: var(--filled);
+      width: 0%;
+      transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .month.current-month .month-progress-fill {
+      background: var(--today);
     }
 
     .days-grid {
@@ -167,55 +323,119 @@
       gap: 3px;
     }
 
+    /* ── Day Squares ── */
     .day {
       aspect-ratio: 1;
-      border-radius: 2px;
+      border-radius: 3px;
       background: var(--empty);
       position: relative;
       min-width: 0;
+      opacity: 0;
+      transform: scale(0.5);
+      transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+    }
+
+    .day.revealed {
+      animation: popIn 0.3s ease forwards;
+    }
+
+    @keyframes popIn {
+      0% { opacity: 0; transform: scale(0.5); }
+      70% { transform: scale(1.1); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+
+    .day:not(.empty-slot):hover {
+      transform: scale(1.6) !important;
+      z-index: 10;
+      box-shadow: 0 0 12px rgba(0,0,0,0.5);
+      border-radius: 3px;
     }
 
     .day.filled {
       background: var(--filled);
-      opacity: 0.85;
+    }
+
+    .day.filled-early {
+      opacity: 0.55;
+    }
+
+    .day.filled-mid {
+      opacity: 0.72;
+    }
+
+    .day.filled-recent {
+      opacity: 0.88;
     }
 
     .day.today {
       background: var(--today);
-      opacity: 1;
-      box-shadow: 0 0 6px rgba(240, 136, 62, 0.5);
+      animation: popIn 0.3s ease forwards, pulse 2s ease-in-out infinite 0.3s;
+      z-index: 5;
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        box-shadow: 0 0 4px rgba(240, 136, 62, 0.4);
+      }
+      50% {
+        box-shadow: 0 0 14px rgba(240, 136, 62, 0.7), 0 0 30px rgba(240, 136, 62, 0.2);
+      }
     }
 
     .day.birthday {
-      background: #f778ba;
-      opacity: 1;
-      box-shadow: 0 0 6px rgba(247, 120, 186, 0.5);
+      background: var(--birthday);
+      animation: popIn 0.3s ease forwards, birthdayPulse 1.5s ease-in-out infinite 0.3s;
+    }
+
+    @keyframes birthdayPulse {
+      0%, 100% {
+        box-shadow: 0 0 4px rgba(247, 120, 186, 0.4);
+      }
+      50% {
+        box-shadow: 0 0 14px rgba(247, 120, 186, 0.7), 0 0 30px rgba(247, 120, 186, 0.2);
+      }
     }
 
     .day.empty-slot {
       background: transparent;
+      opacity: 1 !important;
+      transform: scale(1) !important;
+      animation: none !important;
     }
 
+    /* ── Tooltip ── */
     .tooltip {
       display: none;
       position: fixed;
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 0.4rem 0.6rem;
+      border-radius: 8px;
+      padding: 0.5rem 0.75rem;
       font-size: 0.75rem;
       color: var(--text);
       pointer-events: none;
       z-index: 100;
       white-space: nowrap;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+      opacity: 0;
+      transition: opacity 0.15s ease;
     }
 
+    .tooltip.show {
+      display: block;
+      opacity: 1;
+    }
+
+    /* ── Legend ── */
     .legend {
       display: flex;
       justify-content: center;
       gap: 1.5rem;
       margin-top: 2rem;
       flex-wrap: wrap;
+      opacity: 0;
+      animation: fadeIn 0.6s ease 1.5s forwards;
     }
 
     .legend-item {
@@ -229,36 +449,58 @@
     .legend-swatch {
       width: 12px;
       height: 12px;
-      border-radius: 2px;
+      border-radius: 3px;
     }
 
+    .legend-swatch.swatch-today {
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    /* ── Birthday Countdown ── */
+    .birthday-countdown {
+      text-align: center;
+      margin-bottom: 1.5rem;
+      font-size: 0.85rem;
+      color: var(--birthday);
+      opacity: 0;
+      animation: fadeIn 0.6s ease 0.5s forwards;
+    }
+
+    .birthday-countdown .days-until {
+      font-weight: 700;
+      font-size: 1rem;
+    }
+
+    /* ── Footer ── */
     footer {
       text-align: center;
       margin-top: 2.5rem;
       color: var(--text-muted);
       font-size: 0.75rem;
+      opacity: 0;
+      animation: fadeIn 0.6s ease 2s forwards;
     }
 
+    footer .quote {
+      font-style: italic;
+      margin-bottom: 0.5rem;
+    }
+
+    /* ── Responsive ── */
     @media (max-width: 700px) {
-      .months-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
-      .stats {
-        gap: 0.5rem;
-      }
-      .stat-card {
-        min-width: 100px;
-        padding: 0.75rem 1rem;
-      }
+      .months-grid { grid-template-columns: repeat(2, 1fr); }
+      .stats { gap: 0.5rem; }
+      .stat-card { min-width: 100px; padding: 0.75rem 1rem; }
+      .progress-ring-wrapper { width: 140px; height: 140px; }
+      .progress-ring { width: 140px; height: 140px; }
+      .progress-ring-pct { font-size: 1.8rem; }
     }
 
     @media (max-width: 440px) {
-      .months-grid {
-        grid-template-columns: 1fr;
-      }
-      body {
-        padding: 1rem;
-      }
+      .months-grid { grid-template-columns: 1fr; }
+      body { padding: 1rem; }
+      .progress-ring-wrapper { width: 120px; height: 120px; }
+      .progress-ring { width: 120px; height: 120px; }
     }
   </style>
 </head>
@@ -267,8 +509,29 @@
     <header>
       <h1>Year in Pixels</h1>
       <p class="subtitle" id="subtitle"></p>
+      <div class="live-clock" id="clock"></div>
     </header>
 
+    <div class="progress-ring-container">
+      <div class="progress-ring-wrapper">
+        <svg class="progress-ring" viewBox="0 0 180 180">
+          <defs>
+            <linearGradient id="ringGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#39d353" />
+              <stop offset="100%" stop-color="#f0883e" />
+            </linearGradient>
+          </defs>
+          <circle class="progress-ring-bg" cx="90" cy="90" r="80" />
+          <circle class="progress-ring-fill" cx="90" cy="90" r="80" />
+        </svg>
+        <div class="progress-ring-center">
+          <div class="progress-ring-pct" id="ring-pct">0%</div>
+          <div class="progress-ring-label">of year</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="birthday-countdown"></div>
     <div class="stats" id="stats"></div>
     <div id="quarters"></div>
 
@@ -282,16 +545,17 @@
         <span>Passed</span>
       </div>
       <div class="legend-item">
-        <div class="legend-swatch" style="background: var(--today)"></div>
+        <div class="legend-swatch swatch-today" style="background: var(--today)"></div>
         <span>Today</span>
       </div>
       <div class="legend-item">
-        <div class="legend-swatch" style="background: #f778ba"></div>
+        <div class="legend-swatch" style="background: var(--birthday)"></div>
         <span>Birthday</span>
       </div>
     </div>
 
     <footer>
+      <p class="quote" id="quote"></p>
       <p>Time doesn't wait. Make it count.</p>
     </footer>
   </div>
@@ -299,7 +563,7 @@
   <div class="tooltip" id="tooltip"></div>
 
   <script>
-    const BIRTHDAY_MONTH = 5;
+    const BIRTHDAY_MONTH = 5; // May
     const BIRTHDAY_DAY = 11;
 
     const MONTH_NAMES = [
@@ -307,14 +571,15 @@
       'July', 'August', 'September', 'October', 'November', 'December'
     ];
 
-    const QUARTER_MONTHS = [
-      [0, 1, 2],
-      [3, 4, 5],
-      [6, 7, 8],
-      [9, 10, 11]
-    ];
-
+    const QUARTER_MONTHS = [[0,1,2],[3,4,5],[6,7,8],[9,10,11]];
     const QUARTER_COLORS = ['#39d353', '#2ea043', '#1a7f37', '#006d32'];
+
+    const QUOTES = [
+      '"The bad news is time flies. The good news is you\'re the pilot." — Michael Altshuler',
+      '"Time is what we want most, but what we use worst." — William Penn',
+      '"Lost time is never found again." — Benjamin Franklin',
+      '"The two most powerful warriors are patience and time." — Leo Tolstoy',
+    ];
 
     function getDaysInMonth(year, month) {
       return new Date(year, month + 1, 0).getDate();
@@ -322,8 +587,7 @@
 
     function getDayOfYear(date) {
       const start = new Date(date.getFullYear(), 0, 0);
-      const diff = date - start;
-      return Math.floor(diff / (1000 * 60 * 60 * 24));
+      return Math.floor((date - start) / (1000 * 60 * 60 * 24));
     }
 
     function getDaysInYear(year) {
@@ -334,6 +598,131 @@
       return new Date(year, month, 1).getDay();
     }
 
+    // ── Animated counter ──
+    function animateValue(el, start, end, duration) {
+      const range = end - start;
+      const startTime = performance.now();
+      const isPercent = typeof end === 'string';
+
+      function update(currentTime) {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        // easeOutExpo
+        const eased = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
+        const current = Math.round(start + range * eased);
+        el.textContent = isPercent ? current + '%' : current;
+        if (progress < 1) requestAnimationFrame(update);
+      }
+      requestAnimationFrame(update);
+    }
+
+    // ── Live clock ──
+    function updateClock() {
+      const now = new Date();
+      const h = String(now.getHours()).padStart(2, '0');
+      const m = String(now.getMinutes()).padStart(2, '0');
+      const s = String(now.getSeconds()).padStart(2, '0');
+      document.getElementById('clock').innerHTML =
+        `${h}<span class="clock-separator">:</span>${m}<span class="clock-separator">:</span>${s}`;
+    }
+
+    // ── Birthday countdown ──
+    function renderBirthdayCountdown(year, currentMonth, today) {
+      const el = document.getElementById('birthday-countdown');
+      const bMonth = BIRTHDAY_MONTH - 1; // 0-indexed
+      let bDate = new Date(year, bMonth, BIRTHDAY_DAY);
+      const now = new Date(year, currentMonth, today);
+
+      if (bDate < now) {
+        // Birthday already passed this year
+        const daysSince = Math.floor((now - bDate) / (1000 * 60 * 60 * 24));
+        if (daysSince <= 7) {
+          el.innerHTML = `<span class="days-until">Happy belated birthday!</span> It was ${daysSince} day${daysSince !== 1 ? 's' : ''} ago`;
+          el.className = 'birthday-countdown';
+          return;
+        }
+        // Show countdown to next year's birthday
+        bDate = new Date(year + 1, bMonth, BIRTHDAY_DAY);
+      }
+
+      const diff = Math.ceil((bDate - now) / (1000 * 60 * 60 * 24));
+      if (diff === 0) {
+        el.innerHTML = `<span class="days-until">Happy 25th birthday!</span>`;
+      } else if (diff <= 60) {
+        el.innerHTML = `<span class="days-until">${diff}</span> day${diff !== 1 ? 's' : ''} until your birthday`;
+      } else {
+        el.innerHTML = '';
+      }
+      el.className = 'birthday-countdown';
+    }
+
+    // ── Staggered day reveal ──
+    function revealDays() {
+      const days = document.querySelectorAll('.day:not(.empty-slot)');
+      days.forEach((day, i) => {
+        const delay = i * 3; // 3ms per day = ~1.1s total cascade
+        setTimeout(() => day.classList.add('revealed'), delay);
+      });
+    }
+
+    // ── Animate quarter progress bars ──
+    function animateProgressBars() {
+      document.querySelectorAll('.quarter-progress-fill').forEach(bar => {
+        const target = bar.getAttribute('data-target');
+        setTimeout(() => { bar.style.width = target + '%'; }, 400);
+      });
+      document.querySelectorAll('.month-progress-fill').forEach(bar => {
+        const target = bar.getAttribute('data-target');
+        setTimeout(() => { bar.style.width = target + '%'; }, 600);
+      });
+    }
+
+    // ── Animate stat cards entrance ──
+    function animateStats() {
+      document.querySelectorAll('.stat-card').forEach((card, i) => {
+        setTimeout(() => {
+          card.style.opacity = '1';
+          card.style.transform = 'translateY(0)';
+          card.style.transition = 'opacity 0.4s ease, transform 0.4s ease, box-shadow 0.2s ease, border-color 0.2s ease';
+
+          // Count up the number
+          const valueEl = card.querySelector('.value');
+          const raw = valueEl.getAttribute('data-value');
+          const num = parseInt(raw);
+          if (!isNaN(num) && num > 0) {
+            animateValue(valueEl, 0, num, 1200);
+          }
+        }, 200 + i * 100);
+      });
+    }
+
+    // ── Animate quarter sections ──
+    function animateQuarters() {
+      document.querySelectorAll('.quarter-section').forEach((section, i) => {
+        setTimeout(() => section.classList.add('visible'), 300 + i * 150);
+      });
+    }
+
+    // ── Year ring animation ──
+    function animateRing(pct) {
+      const circumference = 2 * Math.PI * 80; // r=80
+      const fill = document.querySelector('.progress-ring-fill');
+      const pctEl = document.getElementById('ring-pct');
+
+      fill.style.strokeDasharray = `0 ${circumference}`;
+
+      setTimeout(() => {
+        const filled = (pct / 100) * circumference;
+        fill.style.strokeDasharray = `${filled} ${circumference}`;
+        animateValue(pctEl, 0, Math.round(pct), 2000);
+        // Add % sign after animation
+        setTimeout(() => {
+          pctEl.textContent = Math.round(pct) + '%';
+        }, 2100);
+      }, 500);
+    }
+
+    // ── Main render ──
     function render() {
       const now = new Date();
       const year = now.getFullYear();
@@ -342,11 +731,14 @@
       const totalDays = getDaysInYear(year);
       const dayOfYear = getDayOfYear(now);
       const daysLeft = totalDays - dayOfYear;
-      const pct = ((dayOfYear / totalDays) * 100).toFixed(1);
+      const pct = (dayOfYear / totalDays) * 100;
 
       // Subtitle
       document.getElementById('subtitle').textContent =
         `${year} — Day ${dayOfYear} of ${totalDays}`;
+
+      // Birthday
+      renderBirthdayCountdown(year, currentMonth, today);
 
       // Current quarter info
       const currentQuarter = Math.floor(currentMonth / 3);
@@ -356,22 +748,20 @@
       const qTotal = Math.round((qEnd - qStart) / (1000 * 60 * 60 * 24)) + 1;
       const qPassed = Math.min(qTotal, Math.round((now - qStart) / (1000 * 60 * 60 * 24)) + 1);
       const qLeft = qTotal - qPassed;
-
-      // Weeks left in year
       const weeksLeft = Math.floor(daysLeft / 7);
 
       // Stats
       const statsEl = document.getElementById('stats');
       const statsData = [
-        { value: dayOfYear, label: 'Days passed' },
-        { value: daysLeft, label: 'Days left' },
-        { value: `${pct}%`, label: 'Year complete' },
-        { value: `Q${currentQuarter + 1}: ${qLeft}d`, label: 'Left in quarter' },
-        { value: weeksLeft, label: 'Weeks left' },
+        { value: dayOfYear, display: String(dayOfYear), label: 'Days passed' },
+        { value: daysLeft, display: String(daysLeft), label: 'Days left' },
+        { value: Math.round(pct), display: Math.round(pct) + '%', label: 'Year complete' },
+        { value: qLeft, display: `Q${currentQuarter + 1}: ${qLeft}d`, label: 'Left in quarter' },
+        { value: weeksLeft, display: String(weeksLeft), label: 'Weeks left' },
       ];
       statsEl.innerHTML = statsData.map(s => `
         <div class="stat-card">
-          <div class="value">${s.value}</div>
+          <div class="value" data-value="${s.value}">${s.display}</div>
           <div class="label">${s.label}</div>
         </div>
       `).join('');
@@ -380,30 +770,38 @@
       const quartersEl = document.getElementById('quarters');
       quartersEl.innerHTML = '';
 
+      // Calculate total passed days for gradient
+      let totalPassedDays = 0;
+      for (let m = 0; m < currentMonth; m++) totalPassedDays += getDaysInMonth(year, m);
+      totalPassedDays += today;
+
+      let globalDayIndex = 0;
+
       QUARTER_MONTHS.forEach((months, qi) => {
         const section = document.createElement('div');
         section.className = 'quarter-section';
 
-        // Quarter progress
         const qS = new Date(year, months[0], 1);
         const qE = new Date(year, months[2] + 1, 0);
         const qTot = Math.round((qE - qS) / (1000 * 60 * 60 * 24)) + 1;
         let qPass = 0;
-        if (now >= qE) {
-          qPass = qTot;
-        } else if (now >= qS) {
-          qPass = Math.round((now - qS) / (1000 * 60 * 60 * 24)) + 1;
-        }
-        const qPct = Math.min(100, ((qPass / qTot) * 100)).toFixed(0);
+        if (now >= qE) qPass = qTot;
+        else if (now >= qS) qPass = Math.round((now - qS) / (1000 * 60 * 60 * 24)) + 1;
+        const qPctVal = Math.min(100, (qPass / qTot) * 100).toFixed(0);
         const isActive = qi === currentQuarter;
+        const isCompleted = qi < currentQuarter;
+
+        let badgeClass = 'quarter-badge';
+        if (isActive) badgeClass += ' active';
+        else if (isCompleted) badgeClass += ' completed';
 
         section.innerHTML = `
           <div class="quarter-header">
-            <span class="quarter-badge ${isActive ? 'active' : ''}">Q${qi + 1}</span>
+            <span class="${badgeClass}">Q${qi + 1}</span>
             <div class="quarter-progress">
-              <div class="quarter-progress-fill" style="width: ${qPct}%; background: ${QUARTER_COLORS[qi]}"></div>
+              <div class="quarter-progress-fill" data-target="${qPctVal}" style="background: ${QUARTER_COLORS[qi]}"></div>
             </div>
-            <span class="quarter-pct">${qPct}%</span>
+            <span class="quarter-pct">${qPctVal}%</span>
           </div>
           <div class="months-grid"></div>
         `;
@@ -413,34 +811,31 @@
         months.forEach(m => {
           const daysInMonth = getDaysInMonth(year, m);
           const startDay = getStartDayOfWeek(year, m);
-          let passedInMonth = 0;
 
-          if (m < currentMonth) {
-            passedInMonth = daysInMonth;
-          } else if (m === currentMonth) {
-            passedInMonth = today;
-          }
+          let monthPct = 0;
+          if (m < currentMonth) monthPct = 100;
+          else if (m === currentMonth) monthPct = (today / daysInMonth) * 100;
 
           const monthEl = document.createElement('div');
-          monthEl.className = 'month';
+          monthEl.className = 'month' + (m === currentMonth ? ' current-month' : '');
 
           const countText = m === currentMonth
             ? `${daysInMonth - today}d left`
-            : m < currentMonth
-              ? 'done'
-              : `${daysInMonth}d`;
+            : m < currentMonth ? 'done' : `${daysInMonth}d`;
 
           monthEl.innerHTML = `
             <div class="month-name">
               <span>${MONTH_NAMES[m]}</span>
               <span class="month-count">${countText}</span>
             </div>
+            <div class="month-progress-bar">
+              <div class="month-progress-fill" data-target="${monthPct.toFixed(0)}"></div>
+            </div>
             <div class="days-grid"></div>
           `;
 
           const daysGrid = monthEl.querySelector('.days-grid');
 
-          // Empty slots for alignment to day of week
           for (let i = 0; i < startDay; i++) {
             const empty = document.createElement('div');
             empty.className = 'day empty-slot';
@@ -461,16 +856,30 @@
               dayEl.classList.add('birthday');
             } else if (isPassed) {
               dayEl.classList.add('filled');
+
+              // Gradient: older days dimmer, recent days brighter
+              globalDayIndex++;
+              const ratio = globalDayIndex / totalPassedDays;
+              if (ratio < 0.33) dayEl.classList.add('filled-early');
+              else if (ratio < 0.66) dayEl.classList.add('filled-mid');
+              else dayEl.classList.add('filled-recent');
             }
 
-            // Tooltip data
+            // Tooltip
             const dateObj = new Date(year, m, d);
             const dayName = dateObj.toLocaleDateString('en-US', { weekday: 'short' });
             let label = `${dayName}, ${MONTH_NAMES[m]} ${d}`;
-            if (isToday) label += ' (today)';
-            if (isBirthday) label += ' 🎂';
+            if (isToday) label += ' — today';
+            if (isBirthday) label += ' — birthday';
+            if (isPassed) {
+              const daysAgo = dayOfYear - getDayOfYear(dateObj);
+              if (daysAgo === 1) label += ' — yesterday';
+              else if (daysAgo <= 7) label += ` — ${daysAgo} days ago`;
+            } else if (!isToday) {
+              const daysUntil = getDayOfYear(dateObj) - dayOfYear;
+              if (daysUntil > 0 && daysUntil <= 14) label += ` — in ${daysUntil} day${daysUntil > 1 ? 's' : ''}`;
+            }
             dayEl.setAttribute('data-tip', label);
-
             dayEl.addEventListener('mouseenter', showTooltip);
             dayEl.addEventListener('mouseleave', hideTooltip);
 
@@ -482,44 +891,58 @@
 
         quartersEl.appendChild(section);
       });
+
+      // Quote
+      const quoteEl = document.getElementById('quote');
+      quoteEl.textContent = QUOTES[dayOfYear % QUOTES.length];
+
+      // Trigger animations
+      animateRing(pct);
+      animateStats();
+      animateQuarters();
+      setTimeout(revealDays, 500);
+      setTimeout(animateProgressBars, 600);
     }
 
+    // ── Tooltip ──
     const tooltipEl = document.getElementById('tooltip');
 
     function showTooltip(e) {
       const tip = e.target.getAttribute('data-tip');
       if (!tip) return;
       tooltipEl.textContent = tip;
-      tooltipEl.style.display = 'block';
+      tooltipEl.classList.add('show');
       positionTooltip(e);
     }
 
     function positionTooltip(e) {
-      tooltipEl.style.left = e.clientX + 10 + 'px';
-      tooltipEl.style.top = e.clientY - 30 + 'px';
+      const x = e.clientX;
+      const y = e.clientY;
+      const tw = tooltipEl.offsetWidth;
+      const ww = window.innerWidth;
+      const left = (x + tw + 20 > ww) ? x - tw - 10 : x + 12;
+      tooltipEl.style.left = left + 'px';
+      tooltipEl.style.top = (y - 36) + 'px';
     }
 
     function hideTooltip() {
-      tooltipEl.style.display = 'none';
+      tooltipEl.classList.remove('show');
     }
 
     document.addEventListener('mousemove', (e) => {
-      if (tooltipEl.style.display === 'block') {
-        positionTooltip(e);
-      }
+      if (tooltipEl.classList.contains('show')) positionTooltip(e);
     });
 
+    // ── Init ──
     render();
+    updateClock();
+    setInterval(updateClock, 1000);
 
     // Update at midnight
     function scheduleNextDay() {
       const now = new Date();
       const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
-      const ms = tomorrow - now;
-      setTimeout(() => {
-        render();
-        scheduleNextDay();
-      }, ms);
+      setTimeout(() => { render(); scheduleNextDay(); }, tomorrow - now);
     }
     scheduleNextDay();
   </script>
