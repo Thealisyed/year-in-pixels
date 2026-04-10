@@ -481,16 +481,21 @@
       animation: fadeIn 0.6s ease 2s forwards;
     }
 
-    footer .quote {
+    .daily-quote {
+      text-align: center;
       font-style: italic;
-      margin-bottom: 0.75rem;
-      font-size: 0.85rem;
+      font-size: 1.05rem;
       color: var(--text);
-      opacity: 0.7;
-      max-width: 500px;
-      margin-left: auto;
-      margin-right: auto;
-      line-height: 1.5;
+      opacity: 0;
+      max-width: 600px;
+      margin: 0 auto 2.5rem;
+      padding: 1.25rem 1.5rem;
+      line-height: 1.6;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      border-left: 3px solid var(--filled);
+      animation: fadeIn 0.8s ease 1s forwards;
     }
 
     /* ── Responsive ── */
@@ -540,6 +545,7 @@
 
     <div id="birthday-countdown"></div>
     <div class="stats" id="stats"></div>
+    <div class="daily-quote" id="daily-quote"></div>
     <div id="quarters"></div>
 
     <div class="legend">
@@ -562,7 +568,6 @@
     </div>
 
     <footer>
-      <p class="quote" id="quote"></p>
       <p>Time doesn't wait. Make it count.</p>
     </footer>
   </div>
@@ -1056,7 +1061,7 @@
       });
 
       // Quote
-      const quoteEl = document.getElementById('quote');
+      const quoteEl = document.getElementById('daily-quote');
       quoteEl.textContent = QUOTES[dayOfYear % QUOTES.length];
 
       // Trigger animations
